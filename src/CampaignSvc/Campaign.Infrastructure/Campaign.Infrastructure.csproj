@@ -1,0 +1,28 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net9.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <!-- Միայն անհրաժեշտ project հղումներ -->
+    <ProjectReference Include="..\Campaign.Domain\Campaign.Domain.csproj" />
+    <ProjectReference Include="..\Campaign.Application\Campaign.Application.csproj" />
+      <PackageReference Include="BCrypt.Net-Next" Version="4.0.3" />
+
+  </ItemGroup>
+
+  <ItemGroup>
+    <!-- EF Core + Npgsql (դու մոտ արդեն այս փաթեթներն էին) -->
+    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="9.0.10" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="9.0.10">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+    <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="9.0.2" />
+  </ItemGroup>
+
+</Project>
+

@@ -1,0 +1,85 @@
+version: "3.8"
+
+networks:
+  app-net:
+
+volumes:
+  pgdata:
+
+services:
+  postgres:
+    image: postgres:16
+    networks: [app-net]
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: 1111
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+      - ./deploy/initdb:/docker-entrypoint-initdb.d:ro
+
+  redis:
+    image: redis:7
+    networks: [app-net]
+    ports: ["6379:6379"]
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 3s
+      retries: 5
+    restart: unless-stopped
+
+  campaign-api:
+    build:
+      context: .
+      dockerfile: src/CampaignSvc/Campaign.Api/Dockerfile
+    networks:
+      app-net:
+        aliases: [campaign-api]
+    environment:
+      ASPNETCORE_URLS: http://+:5001
+      ASPNETCORE_ENVIRONMENT: Production
+      ConnectionStrings__Default: Host=postgres;Database=campaign;Username=postgres;Password=1111
+      Jwt__Key: this_is_a_very_long_dev_secret_32b
+      Services__AnalyticsBase: http://analytics-api:5002
+    depends_on:
+      - postgres
+    ports: ["5005:5001"]
+
+  analytics-api:
+    build:
+      context: .
+      dockerfile: src/AnalyticsSvc/Analytics.Api/Dockerfile
+    networks:
+      app-net:
+        aliases: [analytics-api]
+    environment:
+      ASPNETCORE_URLS: http://+:5002
+      ASPNETCORE_ENVIRONMENT: Production
+      ConnectionStrings__Default: Host=postgres;Database=analytics;Username=postgres;Password=1111
+      Redis__Connection: redis:6379
+      Services__CampaignBase: http://campaign-api:5001
+    depends_on:
+      - postgres
+      - redis
+      - campaign-api
+    ports: ["5006:5002"]
+
+  core-api:
+    build:
+      context: .
+      dockerfile: src/Core.Api/Dockerfile
+    networks:
+      app-net:
+        aliases: [core-api]
+    environment:
+      ASPNETCORE_URLS: http://+:5000
+      ASPNETCORE_ENVIRONMENT: Production
+      Jwt__Key: this_is_a_very_long_dev_secret_32b
+      Services__CampaignBase: http://campaign-api:5001
+      Services__AnalyticsBase: http://analytics-api:5002
+    depends_on:
+      - campaign-api
+      - analytics-api
+    ports: ["5000:5000"]
