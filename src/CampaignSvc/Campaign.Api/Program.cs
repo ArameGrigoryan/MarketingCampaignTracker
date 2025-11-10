@@ -1,8 +1,10 @@
+using System;
 using System.Text;
 using Campaign.Application.Interfaces;
 using Campaign.Application.IServiceInterfaces;
 using Campaign.Application.Services;
 using Campaign.Application.Validation;
+using Campaign.Infrastructure.Auth;
 using Campaign.Infrastructure.Data;
 using Campaign.Infrastructure.Gateways;
 using Campaign.Infrastructure.Repositories;
@@ -13,48 +15,60 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using Refit;
+using Shared.Abstractions.Security;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Controllers + FluentValidation (նոր API)
+// MVC + Validation
 builder.Services.AddControllers();
 builder.Services.AddFluentValidationAutoValidation()
-                .AddFluentValidationClientsideAdapters();
+    .AddFluentValidationClientsideAdapters();
 builder.Services.AddValidatorsFromAssemblyContaining<CreateCampaignRequestValidator>();
 
+// Swagger + Bearer
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(c =>
 {
     c.SwaggerDoc("v1", new OpenApiInfo { Title = "Campaign API", Version = "v1" });
     c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
     {
-        In = ParameterLocation.Header, Name = "Authorization",
-        Type = SecuritySchemeType.Http, Scheme = "bearer", BearerFormat = "JWT",
+        In = ParameterLocation.Header,
+        Name = "Authorization",
+        Type = SecuritySchemeType.Http,
+        Scheme = "bearer",
+        BearerFormat = "JWT",
         Description = "Bearer {token}"
     });
-    c.AddSecurityRequirement(new OpenApiSecurityRequirement {
-        { new OpenApiSecurityScheme{ Reference = new OpenApiReference{ Type=ReferenceType.SecurityScheme, Id="Bearer"}}, Array.Empty<string>() }
+    c.AddSecurityRequirement(new OpenApiSecurityRequirement
+    {
+        {
+            new OpenApiSecurityScheme
+            {
+                Reference = new OpenApiReference { Type = ReferenceType.SecurityScheme, Id = "Bearer" }
+            },
+            Array.Empty<string>()
+        }
     });
 });
 
-// DbContext
+// Database
 builder.Services.AddDbContext<CampaignDb>(o =>
     o.UseNpgsql(builder.Configuration.GetConnectionString("Default")));
 
-// Repositories + Gateways
+// Services & Gateways
 builder.Services.AddScoped<ICampaignRepository, CampaignRepository>();
 builder.Services.AddScoped<IAnalyticsGateway, AnalyticsGateway>();
-
-// Refit HTTP client to AnalyticsSvc
 builder.Services.AddRefitClient<IAnalyticsGatewayHttp>()
     .ConfigureHttpClient(c =>
         c.BaseAddress = new Uri(builder.Configuration["Services:AnalyticsBase"]!));
-
-// Application services
 builder.Services.AddScoped<ICampaignService, CampaignService>();
 
-// JWT auth
-var keyBytes = Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"] ?? "supersecret_supersecret_123");
+// Auth
+builder.Services.AddScoped<IUserRepository, UserRepository>();
+builder.Services.AddScoped<IAuthService, AuthService>();
+builder.Services.AddSingleton<IJwtProvider, JwtProvider>();
+
+var key = Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"] ?? "supersecret_supersecret_123");
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(o =>
     {
@@ -63,25 +77,23 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
             ValidateIssuer = false,
             ValidateAudience = false,
             ValidateIssuerSigningKey = true,
-            IssuerSigningKey = new SymmetricSecurityKey(keyBytes)
+            IssuerSigningKey = new SymmetricSecurityKey(key)
         };
     });
 builder.Services.AddAuthorization();
 
 var app = builder.Build();
 
+// Pipeline
 app.UseSwagger();
 app.UseSwaggerUI();
-
-// Docker-ում HTTPS չունես՝ UseHttpsRedirection-ը կամ հանիր, կամ պահիր միայն non-docker dev-ի համար
-// app.UseHttpsRedirection();
-
+app.UseRouting();
 app.UseAuthentication();
 app.UseAuthorization();
 app.MapGet("/", () => Results.Redirect("/swagger")).ExcludeFromDescription();
 app.MapControllers();
 
-// DB migrate + seed
+// Seed (ընտրովի)
 using (var scope = app.Services.CreateScope())
 {
     var db = scope.ServiceProvider.GetRequiredService<CampaignDb>();

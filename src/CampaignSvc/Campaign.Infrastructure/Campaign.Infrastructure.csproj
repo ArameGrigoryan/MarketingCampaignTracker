@@ -8,6 +8,8 @@
 
   <ItemGroup>
     <!-- Միայն անհրաժեշտ project հղումներ -->
+    <PackageReference Include="Microsoft.IdentityModel.Tokens" Version="8.14.0" />
+    <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="8.14.0" />
     <ProjectReference Include="..\Campaign.Domain\Campaign.Domain.csproj" />
     <ProjectReference Include="..\Campaign.Application\Campaign.Application.csproj" />
       <PackageReference Include="BCrypt.Net-Next" Version="4.0.3" />
@@ -22,6 +24,10 @@
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
     <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="9.0.2" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\Shared\Shared.Abstractions\Shared.Abstractions.csproj" />
   </ItemGroup>
 
 </Project>

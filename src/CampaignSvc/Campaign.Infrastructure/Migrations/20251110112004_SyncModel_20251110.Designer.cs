@@ -3,6 +3,7 @@ using System;
 using Campaign.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,9 +12,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace Campaign.Infrastructure.Migrations
 {
     [DbContext(typeof(CampaignDb))]
-    partial class CampaignDbModelSnapshot : ModelSnapshot
+    [Migration("20251110112004_SyncModel_20251110")]
+    partial class SyncModel_20251110
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
