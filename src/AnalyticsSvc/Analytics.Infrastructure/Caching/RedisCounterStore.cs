@@ -21,7 +21,6 @@ public class RedisCounterStore : ICounterStore
         return Task.WhenAll(tasks);
     }
 
-// IncrAsync՝ թող նախկինը. INCR TTL չի փոխում, բայց մենք TTL չենք դնում՝ խնդիր չկա
     public async Task<long> IncrAsync(int campaignId, string type, long by = 1, CancellationToken ct = default)
         => (long)await _db.StringIncrementAsync(Key(campaignId, type), by);
 

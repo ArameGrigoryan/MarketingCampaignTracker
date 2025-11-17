@@ -19,13 +19,11 @@ public class CampaignsController : ControllerBase
         => (await _svc.GetAsync(id, ct)) is null ? NotFound() : Ok();
 
 
-    // ---------- մնացած action-ները ----------
     [HttpPost]
     [ProducesResponseType(typeof(CampaignResponse), 200)]
     public Task<CampaignResponse> Create([FromBody] CreateCampaignRequest req, CancellationToken ct)
         => _svc.CreateAsync(req, ct);
 
-    // փոխարինիր tuple-ը DTO-ով (տես ստորև)
     [HttpGet]
     [ProducesResponseType(typeof(PagedResponse<CampaignResponse>), 200)]
     public async Task<PagedResponse<CampaignResponse>> List(

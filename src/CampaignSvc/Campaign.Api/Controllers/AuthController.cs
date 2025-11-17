@@ -1,5 +1,5 @@
-using Microsoft.AspNetCore.Mvc;
 using Campaign.Application.IServiceInterfaces;
+using Microsoft.AspNetCore.Mvc;
 using LoginRequest    = Shared.Contracts.LoginRequest;
 using RegisterRequest = Shared.Contracts.RegisterRequest;
 using LoginResponse  = Shared.Contracts.LoginResponse;

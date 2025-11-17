@@ -20,7 +20,6 @@ public class AnalyticsDb : DbContext
             e.HasIndex(x => new { x.CampaignId, x.Type });
         });
 
-        // campaign projection table config
         b.Entity<CampaignProjection>(e =>
         {
             e.HasKey(x => x.Id);

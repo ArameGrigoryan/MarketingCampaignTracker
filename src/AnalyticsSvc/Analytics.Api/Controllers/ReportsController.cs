@@ -11,22 +11,17 @@ public class ReportsController : ControllerBase
     private readonly IEventService _svc;
     public ReportsController(IEventService svc) => _svc = svc;
 
-    // արդեն ունես
     [HttpGet("{campaignId:int}")]
     [ProducesResponseType(typeof(MetricsResponse), 200)]
     public Task<MetricsResponse> Get(int campaignId, CancellationToken ct)
         => _svc.GetMetricsAsync(campaignId, ct);
 
-    // ⬇ bulk
-    // GET /metrics?ids=1&ids=2&ids=3
     [HttpGet]
     [ProducesResponseType(typeof(IReadOnlyList<MetricsResponse>), 200)]
     [ProducesResponseType(400)]
     public async Task<IActionResult> GetBulk([FromQuery] int[] ids, CancellationToken ct)
     {
-        if (ids is null || ids.Length == 0) return BadRequest("ids required");
-        // քեշի հիթերը կաշխատեն IEventService-ի ներսում
-        // եթե ուզում ես նվազեցնել կրկնօրինակները՝ Distinct, բայց պահպանիր order-ը
+        if (ids is null || ids.Length == 0) return BadRequest("ids required"); 
         var tasks = ids.Select(id => _svc.GetMetricsAsync(id, ct)).ToArray();
         var results = await Task.WhenAll(tasks);
         return Ok(results);

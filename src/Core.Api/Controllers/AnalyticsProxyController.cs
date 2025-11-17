@@ -24,5 +24,11 @@ public class AuthProxyController : ControllerBase
         var status = (int)r.StatusCode == 0 ? 502 : (int)r.StatusCode;
         return Problem(statusCode: status, title: "CampaignSvc login error", detail: detail);
     }
+    [HttpPost("register")]
+    public async Task<IActionResult> Register([FromBody] RegisterRequest req, CancellationToken ct)
+    {
+        await _campaign.RegisterAsync(req, ct);
+        return Ok();
+    }
 
 }

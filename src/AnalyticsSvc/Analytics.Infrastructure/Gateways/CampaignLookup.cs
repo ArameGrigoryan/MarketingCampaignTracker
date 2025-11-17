@@ -24,7 +24,6 @@ public sealed class CampaignLookup : ICampaignLookup
         using var req = new HttpRequestMessage(HttpMethod.Head, $"/campaigns/{id}/exists");
         using var resp = await _http.SendAsync(req, ct);
 
-        // 5xx → մի քեշավորի և բարձրացրու սխալ, որպեսզի ingest-ը չդառնա “չկա”
         if ((int)resp.StatusCode >= 500)
             throw new HttpRequestException($"Upstream {resp.StatusCode}");
 

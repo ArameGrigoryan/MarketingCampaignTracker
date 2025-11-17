@@ -16,6 +16,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\CampaignSvc\Campaign.Application\Campaign.Application.csproj" />
     <ProjectReference Include="..\Shared\Shared.Contracts\Shared.Contracts.csproj" />
   </ItemGroup>
 

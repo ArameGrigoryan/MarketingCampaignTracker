@@ -1,4 +1,6 @@
+using System.Net.Http.Json;
 using Campaign.Application.Interfaces;
+using Shared.Contracts;
 
 namespace Campaign.Infrastructure.Gateways;
 
@@ -12,4 +14,8 @@ public sealed class AnalyticsGateway : IAnalyticsGateway
         var resp = await _http.InitAsync(campaignId, ct);
         return resp.IsSuccessStatusCode;
     }
+    
+    public Task RecordEventAsync(EventRecordRequest request, CancellationToken ct = default)
+        => _http.RecordEventAsync(request, ct);
+
 }

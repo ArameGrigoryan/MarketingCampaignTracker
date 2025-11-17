@@ -1,6 +1,3 @@
-using System;
-using System.Threading;
-using System.Threading.Tasks;
 using Campaign.Application.Interfaces;
 using Campaign.Application.IServiceInterfaces;
 using Shared.Abstractions.Security;

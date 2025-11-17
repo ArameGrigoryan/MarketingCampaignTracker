@@ -1,4 +1,3 @@
-using System;
 using System.Text;
 using Campaign.Application.Interfaces;
 using Campaign.Application.IServiceInterfaces;

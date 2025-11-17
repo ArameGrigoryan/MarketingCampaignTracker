@@ -32,4 +32,8 @@ public interface ICampaignClient
 
     [Post("/auth/login")]
     Task<ApiResponse<LoginResponse>> Login([Body] LoginRequest req, CancellationToken ct = default);
+    
+    [Post("/auth/register")]
+    Task RegisterAsync([Body] RegisterRequest request, CancellationToken ct = default);
+
 }
